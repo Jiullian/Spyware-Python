@@ -3,7 +3,13 @@ import platform, os, ctypes
 # Fonction création simple du fichier
 def creation_fichier(nom_fichier, sys):
     if sys == "Linux":
-        pass
+        # Créer un fichier cacher dans le dossier Document de l'utilisateur
+        try:
+            path = "/home/%s/Documents/.%s" %(os.getlogin(), nom_fichier)
+            open(path, "w")
+            return path
+        except Exception as e:
+            print(f"Erreur lors de la création de %s : {e}" %(nom_fichier))
     elif sys == "Windows":
         # Créer un fichier cacher dans le dossier Document de l'utilisateur
         try:
