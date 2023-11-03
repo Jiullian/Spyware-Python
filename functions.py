@@ -1,4 +1,4 @@
-import platform, os, ctypes, socket
+import platform, os, ctypes, socket, ssl
 
 # Fonction création simple du fichier
 def creation_fichier(nom_fichier, sys):
@@ -66,18 +66,24 @@ def client(file_path):
     # Création du socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Etablisser une connexion avec le serveur
-    client_socket.connect(server_address)
+    # Création du socket SSL
+    client_ssl = ssl.wrap_socket(client_socket,ca_certs="certificat.pem")
 
-    # Ouvrir le fichier en mode lecture binaire
-    with open(file_path, "rb") as f:
-        # Lire les données du fichier
-        data = f.read(1024)
-        while data:
-            # Envoyer les données au serveur
-            client_socket.send(data)
+    try :
+        # Connecter ssl
+        client_ssl.connect(server_address)
+
+        # Ouvrir le fichier en mode lecture binaire
+        with open(file_path, "rb") as f:
             # Lire les données du fichier
             data = f.read(1024)
+            while data:
+                # Envoyer les données au serveur
+                client_ssl.send(data)
+                # Lire les données du fichier
+                data = f.read(1024)
 
-    # Fermer la connexion
-    client_socket.close()
+        # Fermer la connexion
+        client_ssl.close()
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du fichier : {e}")
