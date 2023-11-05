@@ -38,8 +38,6 @@ def transfert(server_socket, kill):
     # Fermer ssl
     client_ssl.close()
 
-    return file_name
-
 def dossier_resultats():
     # Créer un dossier pour les résultats
     try:
@@ -58,7 +56,14 @@ def liste_fichiers():
         print("Aucun fichier de capture n'a été trouvé !")
 
 def read_file(file_name):
-    print("Contenu du fichier de capture :")
-    with open(file_name, "r") as f:
-        data = f.read()
-        print(data)
+    try:
+        # Ouvrir le fichier en mode lecture binaire
+        with open(file_name, "rb") as f:
+            file_content = f.read()
+            # Afficher le contenu du fichier
+            print("Contenu du fichier de capture :")
+            print(file_content.decode("utf-8"))  # Assurez-vous de définir le bon encodage si le fichier contient du texte
+    except FileNotFoundError:
+        print(f"Le fichier {file_name} n'a pas été trouvé.")
+    except Exception as e:
+        print(f"Une erreur s'est produite lors de la lecture du fichier : {str(e)}")

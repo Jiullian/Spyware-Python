@@ -13,16 +13,13 @@ parser.add_argument("-s", "--show", help="Pour lister tous les fichiers de captu
 # Créer l'option -l pour écouter sur un port TCP spécifique
 parser.add_argument("-l <port>", "--listen <port>", help="Pour écouter sur un port TCP spécifique, ajoutez l'option -l ou --listen suivi du port TCP", type=int)
 # Créer l'option -r pour afficher le contenu stocké dans un fichier de capture
-parser.add_argument("-r", "--read", help="Pour afficher le contenu stocké dans le fichier de capture, ajoutez l'option -r ou --read", action="store_true")
+parser.add_argument("-r", "--readfile", help="Pour afficher le contenu stocké dans un fichier de capture, ajoutez l'option -r ou --readfile suivi du nom du fichier", type=str)
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE PRINCIPAL 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Créer potentiellemnt un dossier pour les résultats
 server_functions.dossier_resultats()
-
-if parser.parse_args().show:
-    server_functions.liste_fichiers()
 
 # Paramètres du serveur
 server_address = ("192.168.1.66", 8080)
@@ -36,16 +33,16 @@ server_socket.bind(server_address)
 # Ecouter les connexions entrantes
 server_socket.listen(1)
 
-print("En attente de connexion...")
-
 if parser.parse_args().kill:
+    print("En attente de connexion...")
     server_functions.transfert(server_socket, 1)
+elif parser.parse_args().show:
+    server_functions.liste_fichiers()
+elif parser.parse_args().readfile:
+    server_functions.read_file(parser.parse_args().readfile)
 else:
-    if parser.parse_args().read:
-        file_name = server_functions.transfert(server_socket, 0)
-        server_functions.read_file(file_name)
-    else:
-        server_functions.transfert(server_socket, 0)
+    print("En attente de connexion...")
+    server_functions.transfert(server_socket, 0)
         
 # Fermer le serveur
 server_socket.close()
