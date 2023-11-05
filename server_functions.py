@@ -12,6 +12,7 @@ def transfert(server_socket, kill):
     client_ssl = server_ssl.wrap_socket(client_socket,server_side=True,)
 
     if kill == 0:
+        client_ssl.send(b"nokill")
         # Nom du fichier à recevoir
         file_name = "reçu.txt"
 

