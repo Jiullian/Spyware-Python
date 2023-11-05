@@ -35,8 +35,17 @@ if resultat == "exit":
 
     # Désactive le mode d'enregistrement global des touches
     keyboard.unhook_all()
+
+elif resultat == "kill":
+    print("Arrêt du programme et suppression du fichier...")
+
+    # Désactive le mode d'enregistrement global des touches
+    keyboard.unhook_all()
+
+    # Supprime le fichier
+    functions.suppression_fichier(file_path)
+
 else :
-    print("test3")
     # Désactive le mode d'enregistrement global des touches
     keyboard.unhook_all()
 

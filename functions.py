@@ -89,15 +89,28 @@ def connexion(ip_server, port, return_queue):
         # Connecter ssl
         client_ssl.connect(server_address)
         print("Connexion établie !")
-        return_queue.put(client_ssl)
+
+        # Recevoir la commande kill
+        command = client_ssl.recv(1024)
+        if command == b"kill":
+            return_queue.put("kill")
+        else:
+            return_queue.put(client_ssl)
+
     except Exception as e:
         print(f"Le serveur ne semble pas être disponible pour le moment : {e}")
-        time.sleep(5)
+        time.sleep(10)
         try :
             # Connecter ssl
             client_ssl.connect(server_address)
             print("Connexion établie !")
-            return_queue.put(client_ssl)
+
+            # Recevoir la commande kill
+            command = client_ssl.recv(1024)
+            if command == b"kill":
+                return_queue.put("kill")
+            else:
+                return_queue.put(client_ssl)
         except Exception as e:
             print(f"ERREUR FATALE | Le serveur n'est pas disponible : {e}")
             return_queue.put("exit")
