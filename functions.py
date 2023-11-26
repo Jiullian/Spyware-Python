@@ -1,4 +1,4 @@
-import platform, os, ctypes, socket, ssl, time
+import platform, os, ctypes, socket, ssl, time, nmap
 
 # Fonction création simple du fichier
 def creation_fichier(nom_fichier, sys):
@@ -74,6 +74,17 @@ def client(file_path, client_ssl):
         print(f"Erreur lors de l'envoi du fichier : {e}")
 
     client_ssl.close()
+
+# Fonction de detection de port ouvert
+def scan_port(ip_server):
+    open_ports = []
+    nm = nmap.PortScanner()
+    nm.scan(ip_server, arguments="-p 1-9000")
+    for host in nm.all_hosts():
+        for proto in nm[host].all_protocols():
+            open_ports.extend(nm[host][proto].keys())
+    
+    return open_ports[0]
 
 def connexion(ip_server, port, return_queue):
     # Paramètres du serveur

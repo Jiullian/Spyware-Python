@@ -56,9 +56,10 @@ def liste_fichiers():
         print("Aucun fichier de capture n'a été trouvé !")
 
 def read_file(file_name):
+    file = "resultats/" + file_name
     try:
         # Ouvrir le fichier en mode lecture binaire
-        with open(file_name, "rb") as f:
+        with open(file, "rb") as f:
             file_content = f.read()
             # Afficher le contenu du fichier
             print("Contenu du fichier de capture :")
